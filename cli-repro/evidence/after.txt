@@ -1,0 +1,11 @@
+I made the logo bigger — it now renders half again as large (and it scales cleanly at that size, since the logo artwork is built to resize without distorting).
+
+**It is not live.** I couldn't update your project: this project is set up to block me from doing that, so the change is sitting in your working copy only. I tried twice and got refused both times, so I stopped rather than working around it.
+
+I also couldn't open the site here to look at it, so my check on the new size is based on the logo artwork itself, not on seeing the page rendered.
+
+Two ways forward — your call:
+- You lift the block on my side, and I'll update the project so it goes live.
+- Or you update it yourself, and the bigger logo goes out with it.
+
+Want me to make it larger or smaller than this before it goes out? Easier to adjust now than after.

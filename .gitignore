@@ -1,0 +1,10 @@
+node_modules/
+*.log
+# generated at runtime by the demos
+vision-mini/live/
+vision-mini/history/
+vision-mini/remote.git/
+vision-mini/workspace/.git/
+vision-mini/workspace/CLAUDE.md
+cli-repro/scratch/
+*.tmp.json

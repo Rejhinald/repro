@@ -1,0 +1,5 @@
+:root { --brand: #1f6feb; }
+body { font-family: system-ui, sans-serif; margin: 0 auto; max-width: 60rem; padding: 2rem; }
+header { display: flex; align-items: center; justify-content: space-between; }
+.logo { width: 180px; height: auto; }
+h1 { color: var(--brand); }

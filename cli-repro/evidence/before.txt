@@ -1,0 +1,25 @@
+Logo is bigger; the commit is blocked on permissions.
+
+**Change made** — `style.css:4`:
+
+```diff
+-.logo { width: 120px; height: auto; }
++.logo { width: 180px; height: auto; }
+```
+
+120px → 180px. `height: auto` keeps the SVG's 3:1 aspect, and the header is a flexbox with `justify-content: space-between`, so the nav just shifts right.
+
+**Two things I could not do:**
+
+1. **Visual check** — I tried to open the page in Playwright to screenshot it; the browser tool was not approved, so I have not seen it rendered. `EDITED-UNVERIFIED: style.css` — to confirm, open `index.html` in a browser.
+2. **The save** — every git write command came back `This command requires approval`. I tried the branch, the add, and the commit; all three were refused, so I stopped rather than retry.
+
+The repo has a remote (`origin ../remote.git`) and you are on `main`, so I was going to branch before committing:
+
+```
+git checkout -b logo-size
+git add style.css
+git commit -m "Make header logo bigger"
+```
+
+If you would rather commit straight to `main`, drop the first line. Approve the git commands and I will run it.

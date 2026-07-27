@@ -1,0 +1,56 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Bright Coast Dental</title>
+<link rel="stylesheet" href="/style.css">
+
+<header class="bar">
+  <div class="bar-left">
+    <strong>Bright Coast Dental</strong>
+    <span id="chip" class="chip chip-live">Live</span>
+  </div>
+  <div class="bar-right">
+    <label class="mode" title="Turn this off to see how the agent talked before the fix">
+      <input type="checkbox" id="plain" checked>
+      <span>Plain language</span>
+    </label>
+    <button id="publish" class="btn btn-primary">Update project</button>
+  </div>
+</header>
+
+<main class="split">
+  <section class="chat" aria-label="Chat">
+    <div id="log" class="log">
+      <div class="msg msg-agent">
+        <p>Tell me what you'd like to change and I'll show you here before anything goes live.</p>
+      </div>
+    </div>
+    <form id="form" class="composer">
+      <input id="input" placeholder="make the logo bigger" autocomplete="off" required>
+      <button class="btn">Send</button>
+    </form>
+  </section>
+
+  <section class="panes" aria-label="Preview and live">
+    <div class="pane">
+      <div class="pane-head">
+        <span>Preview</span>
+        <small>what you're working on</small>
+      </div>
+      <iframe id="preview" src="/preview/" title="Preview"></iframe>
+    </div>
+    <div class="pane">
+      <div class="pane-head">
+        <span>Live</span>
+        <small>what visitors see</small>
+      </div>
+      <iframe id="live" src="/live/" title="Live site"></iframe>
+    </div>
+  </section>
+</main>
+
+<aside class="history">
+  <h2>Your versions</h2>
+  <ul id="versions"><li class="empty">Nothing published yet.</li></ul>
+</aside>
+
+<script src="/app.js"></script>
