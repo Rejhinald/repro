@@ -5,7 +5,11 @@
 body { font-family: system-ui, sans-serif; margin: 0 auto; max-width: 60rem; padding: 2rem; }
 header { display: flex; align-items: center; justify-content: space-between; }
 .logo { width: 120px; height: auto; }
-h1 { color: var(--brand); }</style>
+h1 { color: var(--brand); }
+#pricing { margin-top: 3rem; }
+.price-card { background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 8px; padding: 2rem; text-align: center; max-width: 300px; }
+.price-card h3 { margin-top: 0; }
+.price-card .price { font-size: 2rem; font-weight: bold; color: var(--brand); margin: 0.5rem 0; }</style>
 <header>
   <img class="logo" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20120%2040%22%20width%3D%22120%22%20height%3D%2240%22%3E%3Crect%20width%3D%22120%22%20height%3D%2240%22%20rx%3D%226%22%20fill%3D%22%231f6feb%22%2F%3E%3Ctext%20x%3D%2260%22%20y%3D%2225%22%20font-family%3D%22sans-serif%22%20font-size%3D%2213%22%20fill%3D%22%23fff%22%20text-anchor%3D%22middle%22%3EBright%20Coast%3C%2Ftext%3E%3C%2Fsvg%3E" alt="Bright Coast Dental">
   <nav><a href="#services">Services</a> <a href="#pricing">Pricing</a></nav>
@@ -13,5 +17,12 @@ h1 { color: var(--brand); }</style>
 <main>
   <h1>Gentle dentistry on the coast</h1>
   <p>Accepting new patients this month.</p>
-  <section id="pricing"><h2>Pricing</h2><p>Cleanings from $89.</p></section>
+  <section id="pricing">
+    <h2>Pricing</h2>
+    <div class="price-card">
+      <h3>Standard Cleaning</h3>
+      <p class="price">From $89</p>
+      <p>Includes a comprehensive exam, x-rays, and professional cleaning.</p>
+    </div>
+  </section>
 </main>
