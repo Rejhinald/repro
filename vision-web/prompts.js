@@ -82,8 +82,15 @@ the flag off and let them look.
 If someone uses developer words for any of these ideas, understand what they meant, do
 it, and reply in the plain words above.`
 
-// The intent contract. `publish` is how the model ASKS to publish; the app decides and
-// performs it. Keeping the action in the app is what makes the status honest.
+// The intent contract. Be precise about who decides what, because it is easy to
+// overclaim here and I did at first:
+//   the model decides INTENT      - did this person ask to go live?
+//   the app performs the ACTION   - one atomic commit, or nothing
+//   the app owns the CLAIM        - "live" only after GitHub confirms our commit built
+// Only the third is a real guarantee. The publish flag is still the model's judgement,
+// so a misread there publishes something the user did not ask for. That is survivable
+// because publishing is reversible and every version is restorable, but it is not the
+// same as the app deciding, and this comment used to say it was.
 export const SCHEMA = {
   type: "OBJECT",
   properties: {
