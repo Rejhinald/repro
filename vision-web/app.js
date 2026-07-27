@@ -1,9 +1,10 @@
 import { START, render } from "./site.js"
 import { BEFORE, AFTER, SCHEMA } from "./prompts.js"
+import { publishFiles, confirmLive, fetchPublished, plainError, SITE_URL } from "./github.js"
 
 const MODEL = "gemini-3.1-pro-preview"
 const $ = (s) => document.querySelector(s)
-const K = { key: "vw:key", work: "vw:workspace", live: "vw:published", vers: "vw:versions", plain: "vw:plain" }
+const K = { key: "vw:key", token: "vw:token", work: "vw:workspace", live: "vw:published", vers: "vw:versions", plain: "vw:plain" }
 
 const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch { return d } }
 const save = (k, v) => localStorage.setItem(k, JSON.stringify(v))
@@ -32,8 +33,10 @@ function setChip(state, detail) {
 
 function paint() {
   $("#preview").srcdoc = render(workspace)
-  $("#live").srcdoc = render(published)
-  setChip(dirty() ? "draft" : "live")
+  // The Live pane loads the real public site, not a local copy of it. A local
+  // re-render would look right even when nothing had actually shipped, which is the
+  // failure this whole exercise is about.
+  if (!busy) setChip(dirty() ? "draft" : "live")
   $("#publish").disabled = busy || !dirty()
 
   $("#files").innerHTML = ""
@@ -86,43 +89,76 @@ function bubble(kind, text, actions) {
   return el
 }
 
-// Publishing is a copy plus a check. The app says what is live, never the model,
-// because the app is the only thing that knows.
-function publish(summary) {
-  setChip("publishing")
-  const snapshot = JSON.parse(JSON.stringify(workspace))
+// One real commit to master, then wait for the host to confirm OUR commit is the one
+// serving. The app decides and states what is live; the model never does, because the
+// model cannot know. "I could not confirm" is a real outcome and is shown as itself.
+async function publish(summary) {
+  const token = localStorage.getItem(K.token)
+  if (!token) { $("#keyDialog").showModal(); return }
+  if (busy) return
 
+  const snapshot = JSON.parse(JSON.stringify(workspace))
   if (!(snapshot["index.html"] || "").trim()) {
     setChip("bad", "the page was empty")
     bubble("bad", "I didn't update your project: the page was empty, so your site is still on the last working version.")
     return
   }
 
-  published = snapshot
-  save(K.live, published)
+  busy = true
+  setChip("publishing")
+  $("#publish").disabled = true
 
-  // Confirm rather than assume. Preview and live are rendered by the same function,
-  // so if these differ something is wrong and we must not claim success.
-  if (render(published) !== render(workspace)) {
-    setChip("bad", "the live copy did not match")
-    bubble("bad", "I didn't update your project: the live copy did not match what you approved.")
-    return
+  // The published site is one self-contained page, built by the same function that
+  // renders the preview. That is what makes them 1:1 rather than merely similar.
+  const payload = { "index.html": render(snapshot) }
+
+  try {
+    const result = await publishFiles(token, payload, summary || "Update the site")
+    if (result.unchanged) {
+      bubble("agent", "That's already how your site looks, so there was nothing to update.")
+      published = snapshot; save(K.live, published)
+      return
+    }
+
+    bubble("sys", "Publishing. Waiting for the site to actually serve it…")
+    const live = await confirmLive(token, result.sha)
+
+    published = snapshot
+    save(K.live, published)
+    versions.unshift({ id: Date.now(), summary: summary || "Updated the site", files: snapshot, sha: result.sha })
+    versions = versions.slice(0, 25)
+    save(K.vers, versions)
+
+    if (live) {
+      setChip("live")
+      bubble("agent", "Updated. Your change is live.", [["View site", () => window.open(SITE_URL, "_blank")]])
+    } else {
+      setChip("publishing", "still going out")
+      bubble("agent", "Published. It can take a minute to show up, so I won't call it live until I've seen it.")
+    }
+    reloadLive()
+  } catch (e) {
+    const p = plainError(e)
+    if (p.clearToken) localStorage.removeItem(K.token)
+    setChip("bad", "not published")
+    bubble("bad", p.text)
+  } finally {
+    busy = false
+    paint()
   }
-
-  versions.unshift({ id: Date.now(), summary: summary || "Updated the site", files: snapshot })
-  versions = versions.slice(0, 25)
-  save(K.vers, versions)
-  paint()
-  bubble("agent", "Updated. Your change is live.")
 }
 
-function restore(id) {
+async function restore(id) {
   const v = versions.find((x) => x.id === id)
   if (!v) return bubble("bad", "That version is no longer available.")
   workspace = JSON.parse(JSON.stringify(v.files))
   save(K.work, workspace)
   paint()
-  publish("Put the project back")
+  await publish("Put the project back")
+}
+
+function reloadLive() {
+  $("#live").src = `${SITE_URL}?t=${Date.now()}`
 }
 
 async function ask(message) {
@@ -222,12 +258,37 @@ document.querySelectorAll(".tab").forEach((t) => {
 })
 
 $("#keySave").onclick = () => {
-  const v = $("#keyInput").value.trim()
-  if (v) localStorage.setItem(K.key, v)
+  const k = $("#keyInput").value.trim()
+  const t = $("#tokenInput").value.trim()
+  if (k) localStorage.setItem(K.key, k)
+  if (t) localStorage.setItem(K.token, t)
   $("#keyInput").value = ""
+  $("#tokenInput").value = ""
+  syncLive()
+}
+
+// What is live is whatever GitHub is serving, so read it from there rather than
+// trusting a local note about what we think we published.
+async function syncLive() {
+  const token = localStorage.getItem(K.token)
+  reloadLive()
+  if (!token) return
+  try {
+    const remote = await fetchPublished(token, ["index.html"])
+    // The published file is the rendered page, so compare it against a render of the
+    // workspace rather than against the workspace source.
+    const same = (remote["index.html"] || "").trim() === render(workspace).trim()
+    published = same ? JSON.parse(JSON.stringify(workspace)) : { ...START, __remote: true }
+    save(K.live, published)
+    setChip(same ? "live" : "draft")
+    $("#publish").disabled = same
+  } catch {
+    // Leave the local view alone rather than claiming a state we could not read.
+  }
 }
 
 $("#plain").checked = plain
 paint()
 bubble("agent", "Tell me what you'd like to change and I'll show you here before anything goes live.")
-if (!localStorage.getItem(K.key)) $("#keyDialog").showModal()
+if (!localStorage.getItem(K.key) || !localStorage.getItem(K.token)) $("#keyDialog").showModal()
+else syncLive()

@@ -23,14 +23,18 @@ it is told to say.
 
 ## Run the demo
 
-No install, no backend, no build step.
+No install, no backend, no build step. Publishing is real: it commits to `master` and
+GitHub Pages serves it at **https://rejhinald.github.io/repro/**
 
 ```bash
 node static-serve.mjs      # or any static server
 ```
 
-Open http://localhost:4100 and paste a Gemini API key when asked. The key is kept in
-your browser's local storage and is never committed to this repository.
+Open http://localhost:4100. It asks for two things, both kept in your browser's local
+storage and neither committed to this repository:
+
+- a **Gemini API key**
+- a **GitHub token** with `repo` scope, so changes can actually go live
 
 Try, in order:
 
@@ -41,19 +45,36 @@ what branch am I on
 push to prod
 ```
 
-Watch the status chip, the Preview and Live tabs, and the version list.
+Watch the status chip, the Preview and Live tabs, and the version list. The Live tab
+loads the real public site, not a local copy of it.
 
 Flip **Plain language** off in the top right to see the before. It changes exactly one
 thing, the system instruction in [vision-web/prompts.js](vision-web/prompts.js), so the
 two modes are directly comparable.
 
-### Why preview and live cannot drift
+### Publishing is one commit, and "live" is never a guess
 
-Publishing copies the working files to the published files, and both panes are rendered
-by the same function, so the only way they can differ is if the files differ. The app
-re-reads the published copy afterwards and refuses to report success if it does not
-match. **The app decides what is live and says so; the model never does**, because the
-model cannot know. That is the same principle as taking git away from it.
+Multiple changed files go up as a **single commit** through the Git Data API. The
+Contents API writes one file per commit, which means a two-file change could half-apply,
+and half-applied is the bug this whole exercise is about.
+
+Then it waits for GitHub to report that **our** commit is the one that built. `github.io`
+sends no CORS headers so the browser cannot fetch the page to check it, but the Pages
+build API can be asked, and a build that reports success for a different commit is not
+our change. If it cannot confirm within the timeout it says "Published, it can take a
+minute to show up" rather than claiming success.
+
+**The app decides what is live and says so; the model never does**, because the model
+cannot know. That is the same principle as taking git away from it.
+
+Verify the chain yourself:
+
+```bash
+GH_TOKEN=$(gh auth token) node test-publish.mjs
+```
+
+A run on 2026-07-28 gave: commit `1bb089cb`, confirmed live after 59s, public fetch 200,
+and the served bytes identical to what was published.
 
 ## What was measured
 

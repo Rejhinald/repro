@@ -37,7 +37,9 @@
     </div>
 
     <div class="pane is-on" data-pane="preview"><iframe id="preview" title="Preview"></iframe></div>
-    <div class="pane" data-pane="live"><iframe id="live" title="Live site"></iframe></div>
+    <div class="pane" data-pane="live">
+      <iframe id="live" title="Live site"></iframe>
+    </div>
     <div class="pane" data-pane="editor">
       <div class="editor">
         <div class="files" id="files"></div>
@@ -54,10 +56,15 @@
 
 <dialog id="keyDialog">
   <form method="dialog" class="keyform">
-    <h2>Add your Gemini key</h2>
-    <p>Stored in this browser only. It is never sent anywhere except Google, and it is
-      not part of this repository.</p>
+    <h2>Connect your accounts</h2>
+    <p>Both are kept in this browser only and are never part of this repository.</p>
+    <label class="keylabel" for="keyInput">Gemini API key</label>
     <input id="keyInput" type="password" placeholder="AQ..." autocomplete="off">
+    <label class="keylabel" for="tokenInput">
+      GitHub token, so changes can go live
+      <a href="https://github.com/settings/tokens/new?scopes=repo&description=vision-mini" target="_blank" rel="noreferrer">get one</a>
+    </label>
+    <input id="tokenInput" type="password" placeholder="ghp_..." autocomplete="off">
     <div class="keyrow">
       <button class="btn btn-primary" id="keySave" value="save">Save</button>
     </div>

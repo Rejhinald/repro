@@ -87,3 +87,5 @@ dialog::backdrop { background: rgba(20, 22, 26, .45); }
   .split { grid-template-columns: 1fr; }
   .editor { grid-template-columns: 1fr; }
 }
+.keylabel { font-size: .82rem; color: var(--mid); margin-top: .3rem; display: flex; justify-content: space-between; gap: .5rem; }
+.keylabel a { color: var(--brand); }
